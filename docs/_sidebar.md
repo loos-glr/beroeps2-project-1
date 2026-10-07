@@ -1,4 +1,4 @@
-- [Empatize](./01-empathize.md)
+- [Empathize](./01-empathize.md)
 - [Define](./02-define.md)
 - [Ideate](./03-ideate.md)
 - [Prototype](./04-prototype.md)
