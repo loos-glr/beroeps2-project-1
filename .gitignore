@@ -1,0 +1,83 @@
+# ============================================================
+# .gitignore — GLR Beroeps 2 "Stop de ontkoking"
+# Docs as Code (Docsify) + HTML/CSS/JS + PHP/MySQL
+# ============================================================
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# --- Windows ---
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# --- Editors / IDE's ---
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+.project
+.settings/
+.apt_generated/
+*.sublime-workspace
+*.sublime-project
+
+# --- Node (Docsify / frontend tooling) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
+.yarn/
+
+# --- Build output / caches ---
+dist/
+build/
+.cache/
+.parcel-cache/
+coverage/
+*.tsbuildinfo
+
+# --- PHP / Composer ---
+/vendor/
+composer.phar
+composer.lock.bak
+
+# --- Environment & secrets (NOOIT committen) ---
+.env
+.env.*
+!.env.example
+*.local
+config.local.php
+secrets.php
+
+# --- Logs & tijdelijke bestanden ---
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# --- Uploads (gebruikerscontent buiten versiebeheer) ---
+# Let op: de map zelf houden we leeg bij via .gitkeep
+uploads/*
+!uploads/.gitkeep
+
+# --- Overig ---
+*.orig
+*.rej
