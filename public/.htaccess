@@ -1,0 +1,7 @@
+# Front controller voor Apache-hosting (FTP).
+# Stuur alle verzoeken zonder bestaand bestand door naar index.php.
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
