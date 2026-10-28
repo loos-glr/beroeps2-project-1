@@ -9,11 +9,19 @@
  *                                            kolommen id, title, image_url,
  *                                            prep_time, difficulty,
  *                                            category_name en category_slug.
+ *                                            Op de overzichtspagina bevat het
+ *                                            ook 'ingredients' (lijst met
+ *                                            ingrediëntnamen).
  * @var string               $linkUrl         Waar de kaart naartoe linkt.
  * @var bool                 $showDescription Omschrijving tonen? (optioneel)
+ * @var bool                 $showIngredients Ingrediënten tonen? (optioneel)
  */
 
 $showDescription = $showDescription ?? false;
+$showIngredients = $showIngredients ?? false;
+
+// Lijst met ingrediëntnamen (alleen op de overzichtspagina gevuld).
+$ingredients = (array) ($recipe['ingredients'] ?? []);
 
 // Moeilijkheid -> leesbaar label (komt overeen met de ENUM in de database).
 $difficultyLabels = [
@@ -54,5 +62,17 @@ $difficulty = (string) $recipe['difficulty'];
             </svg>
             <?= (int) $recipe['prep_time'] ?> min
         </span>
+        <?php if ($showIngredients && $ingredients !== []): ?>
+            <?php
+            $visibleIngredients = array_slice($ingredients, 0, 3);
+            $hiddenCount        = count($ingredients) - count($visibleIngredients);
+            ?>
+            <span class="recipe-card__ingredients">
+                <span aria-hidden="true">🧺</span>
+                <span>
+                    <?= htmlspecialchars(implode(', ', $visibleIngredients)) ?><?= $hiddenCount > 0 ? ' +' . $hiddenCount . ' meer' : '' ?>
+                </span>
+            </span>
+        <?php endif; ?>
     </div>
 </a>
