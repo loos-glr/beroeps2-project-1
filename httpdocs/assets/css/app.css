@@ -334,13 +334,27 @@ a {
     box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18);
 }
 
-.search-icon-inside {
+/* Submit-knop in de zoekbalk (vergrootglas) */
+.search-submit {
     position: absolute;
-    right: 18px;
+    right: 6px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--primary);
-    pointer-events: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.search-submit:hover {
+    background: var(--primary-hover);
 }
 
 /* =========================================
@@ -419,6 +433,208 @@ a {
     font-weight: 700;
     font-size: 13px;
     color: var(--text-dark);
+}
+
+/* =========================================
+   Accessibility helper
+   ========================================= */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* =========================================
+   Melding (bijv. database onbereikbaar)
+   ========================================= */
+.notice {
+    margin: 16px 0;
+    padding: 14px 18px;
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* =========================================
+   Paginakop (overzichtspagina)
+   ========================================= */
+.page-head {
+    margin: 24px 0 4px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+.page-subtitle {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* Chip om de actieve filters te wissen */
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 12px;
+    padding: 8px 14px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* =========================================
+   Receptkaarten + grids (home + overzicht)
+   ========================================= */
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin: 12px 0 24px;
+}
+
+/* Mobiel: uitgelichte recepten als horizontale swipe-rij */
+.featured-scroller {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 76%;
+    gap: 14px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.featured-scroller::-webkit-scrollbar {
+    display: none;
+}
+
+.featured-scroller .recipe-card {
+    scroll-snap-align: start;
+}
+
+.recipe-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.recipe-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.recipe-card__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(135deg, #3d2314 0%, #7c3a1d 100%);
+    overflow: hidden;
+}
+
+/* Emoji-fallback: zichtbaar zolang/wanneer de foto niet laadt */
+.recipe-card__fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+}
+
+.recipe-card__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recipe-card__badge {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--secondary);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.recipe-card__badge--gemiddeld {
+    background: var(--accent);
+    color: var(--text-dark);
+}
+
+.recipe-card__badge--moeilijk {
+    background: var(--primary);
+}
+
+.recipe-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px 14px;
+}
+
+.recipe-card__category {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--secondary);
+}
+
+.recipe-card__title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-dark);
+}
+
+.recipe-card__description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.recipe-card__time {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.recipe-card__time svg {
+    color: var(--primary);
 }
 
 /* =========================================
@@ -591,5 +807,22 @@ a {
 
     body {
         padding-bottom: 30px;
+    }
+
+    /* Overzicht: 3 kolommen op desktop */
+    .recipe-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    /* Uitgelicht: van swipe-rij naar een gewoon grid */
+    .featured-scroller {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(3, 1fr);
+        overflow-x: visible;
+    }
+
+    .page-title {
+        font-size: 30px;
     }
 }
