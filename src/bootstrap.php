@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Bootstrap: laadt de configuratie en stelt kleine helpers beschikbaar.
  *
- * Wordt als eerste geïmporteerd door public/index.php.
+ * Wordt als eerste geïmporteerd door httpdocs/index.php.
  */
 
 const CONFIG_LOCAL   = __DIR__ . '/../config/config.local.php';
@@ -84,7 +84,7 @@ function url(string $path = ''): string
 }
 
 /**
- * Bouwt een URL naar een statisch bestand in public/assets/, bv.
+ * Bouwt een URL naar een statisch bestand in httpdocs/assets/, bv.
  * asset('css/app.css') => '/assets/css/app.css'.
  */
 function asset(string $path): string

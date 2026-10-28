@@ -7,8 +7,8 @@ declare(strict_types=1);
  *
  * Start met:  php -S localhost:8000 -t public router.php
  *
- * Bestaande bestanden uit public/ worden direct geserveerd; alle overige
- * verzoeken gaan naar de front controller (public/index.php).
+ * Bestaande bestanden uit httpdocs/ worden direct geserveerd; alle overige
+ * verzoeken gaan naar de front controller (httpdocs/index.php).
  */
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
@@ -19,4 +19,4 @@ if ($path !== '/' && is_file($file)) {
     return false;
 }
 
-require __DIR__ . '/public/index.php';
+require __DIR__ . '/httpdocs/index.php';

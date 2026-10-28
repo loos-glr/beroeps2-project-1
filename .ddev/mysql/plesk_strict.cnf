@@ -1,0 +1,10 @@
+[mysqld]
+# 1. Enforce Linux case-sensitivity for table names (Plesk default on Linux)
+lower_case_table_names = 0
+
+# 2. Enforce strict SQL modes (catches sloppy GROUP BYs, invalid dates, and truncated strings)
+sql_mode = "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+
+# 3. Match Plesk's default character set and collation
+character-set-server = utf8mb4
+collation-server = utf8mb4_general_ci

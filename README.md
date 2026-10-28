@@ -17,7 +17,7 @@ beroeps2-project-1/
 ├── .gitignore
 ├── .github/
 │   └── PULL_REQUEST_TEMPLATE.md
-├── public/                # Document root (entrypoint)
+├── httpdocs/                # Document root (entrypoint)
 │   ├── index.php          # Front controller / router
 │   ├── .htaccess          # Apache-rewrite voor FTP-hosting
 │   └── assets/
@@ -65,31 +65,27 @@ Open daarna <http://localhost:3000/docs/> in je browser.
 
 ### Applicatie draaien
 
-De applicatie is een PHP/MySQL-app met een front controller in `public/`. Vereist: **PHP 8.0+** en **MySQL**.
+De applicatie is een PHP/MySQL-app met een front controller in `httpdocs/`. We draaien hem lokaal in [DDEV](https://ddev.com), ingericht als de Plesk-omgeving waar je site uiteindelijk op komt: PHP 8.3, MariaDB 10.11 met strikte SQL-modus, een eigen databasegebruiker en verbinden via host `localhost` (Unix-socket).
 
-**1. Configuratie**
-
-Kopieer het voorbeeldbestand en vul je databasegegevens in:
+**1. Starten**
 
 ```bash
-cp config/config.example.php config/config.local.php
+ddev start
 ```
 
-`config/config.local.php` staat in `.gitignore` en wordt dus nooit gecommit.
+Open <https://beroeps2-project-1.ddev.site>. Bij elke start worden de database `smaakmaatje` en de gebruiker `student_user` (wachtwoord `student_password`) aangemaakt (zie `.ddev/plesk/init_plesk_user.sql`). In development-modus toont de homepagina een statusblok dat laat zien of de databaseverbinding werkt.
 
-**2. Database**
+**2. Configuratie**
 
-Maak een MySQL-database aan (bijv. `smaakmaatje`) en zet de naam, gebruiker en het wachtwoord in `config/config.local.php`.
+`config/config.example.php` bevat al de DDEV-waarden en wordt automatisch gebruikt. Op Plesk kopieer je het bestand naar `config/config.local.php` (staat in `.gitignore`) en vul je de database, gebruiker en het wachtwoord in die je in Plesk hebt aangemaakt. De host blijft `localhost`.
 
-**3. Server starten**
+**3. Database beheren**
 
 ```bash
-php -S localhost:8000 -t public router.php
+ddev phpmyadmin                                          # phpMyAdmin openen
+ddev import-db --database=smaakmaatje --file=dump.sql    # dump importeren
+ddev export-db --database=smaakmaatje --file=dump.sql.gz # dump exporteren
 ```
-
-Open <http://localhost:8000> in je browser. In development-modus toont de homepagina een statusblok dat laat zien of de databaseverbinding werkt (inclusief een duidelijke foutmelding als dat mislukt).
-
-> `php -S localhost:8000 -t public` werkt ook, maar dan alleen voor `/` en de statische bestanden — de pretty URLs (bijv. `/recipes`) vereisen `router.php`.
 
 ---
 
