@@ -1,24 +1,64 @@
 <?php
 
 /**
- * Receptenoverzicht — basisversie (leveringsglue voor issue #11).
+ * Overzichtspagina per categorie — issue #12.
  *
  * De homepagina linkt hier naartoe met:
  *   - ?categorie=<slug>  (klik op een categorie-tegel)
  *   - ?q=<zoekterm>      (zoekbalk: ingrediënt of type gerecht)
  *
- * Deze pagina leest die parameters uit en toont de bijbehorende recepten.
- * De volledige overzichtspagina (filterbalk op tijd/moeilijkheid, sorteren)
- * is issue #12; de uitgebreide zoekfunctie is issue #14. Alles wat hier
- * gebeurt gebruikt prepared statements (PDO), dus geen SQL-injectie.
+ * Daarnaast biedt deze pagina de filterbalk uit de wireframe
+ * (docs/04-prototype.md §1): filteren op bereidingstijd en moeilijkheid.
+ * De filters worden server-side toegepast met prepared statements (PDO),
+ * dus geen SQL-injectie. De uitgebreide zoekfunctie is issue #14. Klikken
+ * op een receptkaart linkt naar de detailpagina zodra die bestaat (TODO #13).
  */
 
-$searchQuery  = trim((string) ($_GET['q'] ?? ''));
-$categorySlug = trim((string) ($_GET['categorie'] ?? ''));
+$searchQuery      = trim((string) ($_GET['q'] ?? ''));
+$categorySlug     = trim((string) ($_GET['categorie'] ?? ''));
+$timeFilter       = trim((string) ($_GET['tijd'] ?? ''));
+$difficultyFilter = trim((string) ($_GET['moeilijkheid'] ?? ''));
 
 $recipes      = [];
 $categoryName = null;
 $dbError      = null;
+
+/**
+ * Filteropties voor bereidingstijd (label op de filterchip per ?tijd=-waarde).
+ * Alleen deze sleutels worden geaccepteerd, zodat er nooit onbekende input
+ * in de query terechtkomt.
+ *
+ * @var array<string, string>
+ */
+$timeRanges = [
+    '15' => 'Tot 15 min',
+    '30' => '15–30 min',
+    '60' => '30–60 min',
+    '61' => '60+ min',
+];
+
+/**
+ * Hardcoded SQL-fragmenten per tijdsklasse (sleutels == $timeRanges).
+ *
+ * @var array<string, string>
+ */
+$timeConditions = [
+    '15' => 'r.prep_time <= 15',
+    '30' => 'r.prep_time > 15 AND r.prep_time <= 30',
+    '60' => 'r.prep_time > 30 AND r.prep_time <= 60',
+    '61' => 'r.prep_time > 60',
+];
+
+/**
+ * Moeilijkheidsgraden voor de filterbalk (de ENUM-waarden uit het schema).
+ *
+ * @var array<string, string>
+ */
+$difficultyOptions = [
+    'makkelijk' => 'Makkelijk',
+    'gemiddeld' => 'Gemiddeld',
+    'moeilijk'  => 'Moeilijk',
+];
 
 try {
     $pdo = db();
@@ -62,6 +102,17 @@ try {
         $params[':slug'] = $categorySlug;
     }
 
+    // Filter op bereidingstijd (whitelist hierboven, dus altijd veilig).
+    if (isset($timeConditions[$timeFilter])) {
+        $conditions[] = $timeConditions[$timeFilter];
+    }
+
+    // Filter op moeilijkheid (alleen ENUM-waarden uit de whitelist).
+    if (isset($difficultyOptions[$difficultyFilter])) {
+        $conditions[]          = 'r.difficulty = :difficulty';
+        $params[':difficulty'] = $difficultyFilter;
+    }
+
     if ($conditions !== []) {
         $sql .= ' WHERE ' . implode(' AND ', $conditions);
     }
@@ -71,6 +122,34 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $recipes = $stmt->fetchAll();
+
+    // Ingrediënten van de gevonden recepten in één query ophalen (geen
+    // N+1), zodat de receptkaarten kunnen tonen wat erin zit.
+    if ($recipes !== []) {
+        $ids          = array_map(static fn (array $recipe): int => (int) $recipe['id'], $recipes);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $stmt = $pdo->prepare(
+            'SELECT ri.recipe_id, i.name
+             FROM recipe_ingredients ri
+             INNER JOIN ingredients i ON i.id = ri.ingredient_id
+             WHERE ri.recipe_id IN (' . $placeholders . ')
+             ORDER BY ri.recipe_id, i.name'
+        );
+        $stmt->execute($ids);
+
+        $ingredientsByRecipe = [];
+
+        foreach ($stmt->fetchAll() as $row) {
+            $ingredientsByRecipe[(int) $row['recipe_id']][] = (string) $row['name'];
+        }
+
+        foreach ($recipes as &$recipe) {
+            $recipe['ingredients'] = $ingredientsByRecipe[(int) $recipe['id']] ?? [];
+        }
+
+        unset($recipe);
+    }
 } catch (PDOException $e) {
     $dbError = $e->getMessage();
 }
@@ -86,7 +165,39 @@ if ($searchQuery !== '') {
     $pageHeading = 'Alle recepten';
 }
 
-$isFiltered = $searchQuery !== '' || $categorySlug !== '';
+$isFiltered = $searchQuery !== '' || $categorySlug !== ''
+    || $timeFilter !== '' || $difficultyFilter !== '';
+
+// Parameters die bij elke filterkeuze behouden moeten blijven, zodat de
+// filterchips met elkaar én met categorie/zoekterm te combineren zijn.
+$baseParams = [];
+
+foreach ([
+    'categorie'    => $categorySlug,
+    'q'            => $searchQuery,
+    'tijd'         => $timeFilter,
+    'moeilijkheid' => $difficultyFilter,
+] as $param => $value) {
+    if ($value !== '') {
+        $baseParams[$param] = $value;
+    }
+}
+
+/**
+ * URL voor een filterchip: zet de waarde aan, of (bij klik op de al
+ * actieve chip) juist uit. De overige actieve filters blijven behouden.
+ */
+$filterUrl = static function (string $param, string $value, string $current) use ($baseParams): string {
+    $params = $baseParams;
+
+    if ($current === $value) {
+        unset($params[$param]);
+    } else {
+        $params[$param] = $value;
+    }
+
+    return url('recipes') . '?' . http_build_query($params);
+};
 ?>
 <div class="container">
 
@@ -126,6 +237,31 @@ $isFiltered = $searchQuery !== '' || $categorySlug !== '';
         </button>
     </form>
 
+    <!-- Filterbalk: bereidingstijd + moeilijkheid (issue #12) -->
+    <div class="filters-bar" aria-label="Filters">
+        <div class="filter-group">
+            <span class="filter-group__label">⏱ Tijd</span>
+            <?php foreach ($timeRanges as $value => $label): ?>
+                <a
+                    class="filter-chip-btn<?= $timeFilter === $value ? ' is-active' : '' ?>"
+                    href="<?= htmlspecialchars($filterUrl('tijd', $value, $timeFilter)) ?>"
+                    <?= $timeFilter === $value ? 'aria-current="true"' : '' ?>
+                ><?= htmlspecialchars($label) ?></a>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="filter-group">
+            <span class="filter-group__label">🔥 Moeilijkheid</span>
+            <?php foreach ($difficultyOptions as $value => $label): ?>
+                <a
+                    class="filter-chip-btn<?= $difficultyFilter === $value ? ' is-active' : '' ?>"
+                    href="<?= htmlspecialchars($filterUrl('moeilijkheid', $value, $difficultyFilter)) ?>"
+                    <?= $difficultyFilter === $value ? 'aria-current="true"' : '' ?>
+                ><?= htmlspecialchars($label) ?></a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
     <?php if ($isFiltered): ?>
         <a class="filter-chip" href="<?= htmlspecialchars(url('recipes')) ?>">✕ Wis filters</a>
     <?php endif; ?>
@@ -138,6 +274,7 @@ $isFiltered = $searchQuery !== '' || $categorySlug !== '';
                 // naar het overzicht van de eigen categorie.
                 $linkUrl = url('recipes') . '?' . http_build_query(['categorie' => $recipe['category_slug']]);
                 $showDescription = true;
+                $showIngredients = true;
                 require __DIR__ . '/partials/recipe-card.php';
                 ?>
             <?php endforeach; ?>
@@ -149,7 +286,7 @@ $isFiltered = $searchQuery !== '' || $categorySlug !== '';
                 <?php if ($dbError !== null): ?>
                     De recepten konden niet uit de database geladen worden. Probeer het later opnieuw.
                 <?php else: ?>
-                    Probeer een ander ingrediënt of kies een categorie op de homepagina.
+                    Probeer een andere zoekterm, een andere categorie of wis de filters.
                 <?php endif; ?>
             </p>
             <a class="btn btn-primary" href="<?= htmlspecialchars(url('/')) ?>">Terug naar home</a>
