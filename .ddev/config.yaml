@@ -25,10 +25,14 @@ web_extra_daemons:
       command: "bash -c 'sudo mkdir -p /var/run/mysqld && sudo chmod 1777 /var/run/mysqld && exec socat UNIX-LISTEN:/var/run/mysqld/mysqld.sock,fork,unlink-early,mode=777 TCP:db:3306'"
       directory: /var/www/html
 
-# Maakt de Plesk-achtige database + gebruiker aan (zie .ddev/plesk/).
+# Maakt de Plesk-achtige database + gebruiker aan (zie .ddev/plesk/) en
+# importeert het databaseschema + seeddata (zie .ddev/database/schema.sql).
+# Beide scripts zijn idempotent en draaien dus veilig bij elke `ddev start`.
 hooks:
     post-start:
         - exec: "mysql -uroot -proot < /mnt/ddev_config/plesk/init_plesk_user.sql"
+          service: db
+        - exec: "mysql -uroot -proot smaakmaatje < /mnt/ddev_config/database/schema.sql"
           service: db
 
 # Key features of DDEV's config.yaml:

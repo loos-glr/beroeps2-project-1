@@ -17,6 +17,12 @@ beroeps2-project-1/
 ├── .gitignore
 ├── .github/
 │   └── PULL_REQUEST_TEMPLATE.md
+├── .ddev/                 # Lokale dev-omgeving (simuleert de Plesk-server)
+│   ├── config.yaml        # DDEV-configuratie + post-start hooks
+│   ├── database/
+│   │   └── schema.sql     # Databaseschema + seeddata (ERD uit fase 4)
+│   └── plesk/
+│       └── init_plesk_user.sql  # Database + gebruiker (Plesk-simulatie)
 ├── httpdocs/                # Document root (entrypoint)
 │   ├── index.php          # Front controller / router
 │   ├── .htaccess          # Apache-rewrite voor FTP-hosting
@@ -28,9 +34,11 @@ beroeps2-project-1/
 │   └── views/             # Gedeelde layout + pagina's
 │       ├── header.php
 │       ├── footer.php
-│       ├── home.php
-│       ├── recipes.php
-│       └── 404.php
+│       ├── home.php       # Homepage: hero, zoekbalk, categorieën, uitgelicht
+│       ├── recipes.php    # Receptenoverzicht (basis)
+│       ├── 404.php
+│       └── partials/
+│           └── recipe-card.php  # Herbruikbare receptkaart
 ├── config/
 │   ├── config.example.php # Voorbeeldconfiguratie (gecommit)
 │   └── config.local.php   # Echte DB-gegevens (in .gitignore)
@@ -81,10 +89,19 @@ Open <https://beroeps2-project-1.ddev.site>. Bij elke start worden de database `
 
 **3. Database beheren**
 
+Bij `ddev start` worden automatisch de database `smaakmaatje` en de gebruiker
+aangemaakt én wordt `.ddev/database/schema.sql` geïmporteerd: de vijf tabellen
+uit het ERD plus seeddata (6 categorieën, 10 recepten, ingrediënten en twee
+demo-accounts `chef_sanne` en `admin` met wachtwoord `welkom123`). Beide scripts
+zijn idempotent en draaien dus veilig bij elke start.
+
+Handmatig opnieuw draaien of de tabellen bekijken:
+
 ```bash
-ddev phpmyadmin                                          # phpMyAdmin openen
-ddev import-db --database=smaakmaatje --file=dump.sql    # dump importeren
-ddev export-db --database=smaakmaatje --file=dump.sql.gz # dump exporteren
+ddev mysql -uroot -proot smaakmaatje < .ddev/database/schema.sql  # schema + seeddata
+ddev phpmyadmin                                                   # phpMyAdmin openen
+ddev import-db --database=smaakmaatje --file=dump.sql             # dump importeren
+ddev export-db --database=smaakmaatje --file=dump.sql.gz          # dump exporteren
 ```
 
 ---
