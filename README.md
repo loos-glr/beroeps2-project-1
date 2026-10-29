@@ -27,7 +27,8 @@ beroeps2-project-1/
 │   ├── index.php          # Front controller / router
 │   ├── .htaccess          # Apache-rewrite voor FTP-hosting
 │   └── assets/
-│       └── css/app.css    # Basisstijlen (mobile first)
+│       ├── css/app.css    # Basisstijlen (mobile first)
+│       └── js/app.js      # Bewaren + delen op de detailpagina
 ├── src/                   # PHP-applicatiecode
 │   ├── bootstrap.php      # Configuratie laden + helpers
 │   ├── Database.php       # PDO-databaseverbinding
@@ -36,6 +37,7 @@ beroeps2-project-1/
 │       ├── footer.php
 │       ├── home.php       # Homepage: hero, zoekbalk, categorieën, uitgelicht
 │       ├── recipes.php    # Receptenoverzicht (basis)
+│       ├── recipe.php     # Receptdetail: foto, ingrediënten, bereidingswijze
 │       ├── 404.php
 │       └── partials/
 │           └── recipe-card.php  # Herbruikbare receptkaart
