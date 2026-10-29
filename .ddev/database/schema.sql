@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS `recipes` (
     `category_id` INT          NOT NULL,
     `title`       VARCHAR(100) NOT NULL,
     `description` TEXT         NULL,
+    `steps`       TEXT         NULL,
     `image_url`   VARCHAR(255) NULL,
     `prep_time`   INT          NOT NULL,
     `difficulty`  ENUM('makkelijk', 'gemiddeld', 'moeilijk') NOT NULL DEFAULT 'makkelijk',
@@ -68,6 +69,11 @@ CREATE TABLE IF NOT EXISTS `recipes` (
     CONSTRAINT `fk_recipes_category`
         FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+-- `steps` (bereidingswijze, één stap per regel) is later toegevoegd voor de
+-- detailpagina (issue #13). Voor databases die al bestonden voegen we de
+-- kolom hier alsnog toe; op een nieuwe database bestaat hij al (no-op).
+ALTER TABLE `recipes` ADD COLUMN IF NOT EXISTS `steps` TEXT NULL AFTER `description`;
 
 -- ingredients — losse ingrediënten (voor de zoekfunctie op ingrediënt)
 CREATE TABLE IF NOT EXISTS `ingredients` (
@@ -194,6 +200,31 @@ INSERT IGNORE INTO `recipe_ingredients` (`recipe_id`, `ingredient_id`, `amount`)
     (9, 14, '30 g'),       (9, 15, '4 el'),      (9, 16, '3 el'),      (9, 22, '2 el'),
     -- 10. Appelcrumble
     (10, 21, '4 stuks'),   (10, 15, '150 g'),    (10, 22, '80 g');
+
+-- Bereidingswijze per recept (issue #13) ----------------------
+-- De kolom `steps` is later toegevoegd; bestaande rijen vullen we hier
+-- aan. Alleen als er nog geen stappen staan (IS NULL), zodat eigen invoer
+-- (issue #16) niet overschreven wordt. Elke stap staat op een eigen regel
+-- (\n); de detailpagina splitst en nummert ze.
+UPDATE `recipes` SET `steps` = '1. Snipper de ui en snijd de knoflook fijn.\n2. Verhit de olijfolie in een grote pan en fruit de ui 2 minuten.\n3. Voeg de knoflook en de tomaat toe en laat 5 minuten sudderen.\n4. Maak met een lepel kuiltjes in de saus en breek de eieren erin.\n5. Doe de deksel op de pan en laat 5 minuten zacht pruttelen tot het eiwit gestold is.\n6. Breng op smaak met peper en zout en serveer met brood.' WHERE `id` = 1 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Rooster de sneetjes brood krokant.\n2. Prak de avocado met een vork en breng op smaak met peper en zout.\n3. Bak de eieren als spiegelei in een beetje olie.\n4. Smeer de avocado op het brood en leg de eieren erop. Bestrooi met peper en zout.' WHERE `id` = 2 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Beleg een sneetje brood met de kaas en plakken tomaat.\n2. Leg het tweede sneetje erop en druk licht aan.\n3. Bak de tosti 3 tot 4 minuten per kant in een droge pan of in een tosti-ijzer.\n4. Snijd de tosti diagonaal door en serveer warm.' WHERE `id` = 3 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Kook de rijst volgens de verpakking en laat iets afkoelen.\n2. Snijd de courgette en de avocado in blokjes.\n3. Verdeel de rijst over twee kommen.\n4. Verdeel de tonijn, courgette en avocado erover.\n5. Maak af met een scheutje olijfolie, peper en zout.' WHERE `id` = 4 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Snipper de ui en snijd de knoflook fijn.\n2. Verhit de olijfolie en fruit de ui en knoflook 3 minuten.\n3. Voeg de linzen en de tomaat toe en schenk er 1 liter water bij.\n4. Laat de soep 20 minuten zacht koken tot de linzen gaar zijn.\n5. Pureer de soep met een staafmixer en breng op smaak met peper en zout.' WHERE `id` = 5 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Kook de pasta in ruim water met zout volgens de verpakking.\n2. Snijd de kipfilet in blokjes en bak ze goudbruin in een beetje olie.\n3. Voeg de knoflook toe en bak 1 minuut mee.\n4. Giet de pasta af en meng de pesto erdoor.\n5. Schep de kip erdoor en serveer direct.' WHERE `id` = 6 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Kook de rijst volgens de verpakking.\n2. Snijd de kipfilet in blokjes en snipper de ui.\n3. Bak de kip en de ui 5 minuten in een grote pan.\n4. Voeg de tomaat en de kruiden toe en laat 20 minuten sudderen.\n5. Roer op het laatst een scheutje room of yoghurt erdoor voor een romige saus.\n6. Serveer de curry op de rijst.' WHERE `id` = 7 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Kook de quinoa volgens de verpakking en laat afkoelen.\n2. Snijd de courgette in blokjes en rooster ze 8 minuten in de oven of in een pan.\n3. Snijd de avocado in plakjes.\n4. Verdeel de quinoa over een kom en leg de courgette, avocado en tomaat erop.\n5. Maak af met een dressing naar keuze.' WHERE `id` = 8 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Doe de bloem, suiker en melk in een grote mok en roer glad.\n2. Breek de chocolade in stukjes en schep erdoor.\n3. Zet de mok 60 tot 90 seconden in de magnetron op vol vermogen.\n4. Laat de cake 1 minuut staan en eet hem warm op.' WHERE `id` = 9 AND `steps` IS NULL;
+
+UPDATE `recipes` SET `steps` = '1. Verwarm de oven voor op 180 graden.\n2. Schil de appels, snijd ze in blokjes en verdeel ze over een ovenschaal.\n3. Meng de bloem en de suiker met een klontje boter tot een kruimelig deeg.\n4. Strooi de kruimels over de appels.\n5. Bak de crumble 25 minuten tot de bovenkant goudbruin is.' WHERE `id` = 10 AND `steps` IS NULL;
 
 
 
