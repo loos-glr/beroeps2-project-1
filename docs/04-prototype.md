@@ -93,6 +93,7 @@ We vertalen het gekozen concept (Smaakmaatje) naar een werkend prototype in Figm
 | category_id | INT (FK → categories.id) | Categorie |
 | title | VARCHAR(100) | Naam van het gerecht |
 | description | TEXT | Korte omschrijving |
+| steps | TEXT | Bereidingswijze; één stap per regel |
 | image_url | VARCHAR(255) | Pad naar de foto |
 | prep_time | INT | Bereidingstijd in minuten |
 | difficulty | ENUM('makkelijk','gemiddeld','moeilijk') | Moeilijkheidsgraad |
