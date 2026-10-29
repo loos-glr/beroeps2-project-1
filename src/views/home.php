@@ -133,10 +133,8 @@ $categoryIcons = [
         <div class="featured-scroller">
             <?php foreach ($featuredRecipes as $recipe): ?>
                 <?php
-                // TODO(#13): zodra de detailpagina bestaat, linkt de kaart naar
-                // /recipes/<id>. Tot die tijd naar het overzicht van de
-                // categorie waarin dit recept valt.
-                $linkUrl = url('recipes') . '?' . http_build_query(['categorie' => $recipe['category_slug']]);
+                // Kaart linkt naar de detailpagina van dit recept (issue #13).
+                $linkUrl = url('recipes/' . $recipe['id']);
                 $showDescription = false;
                 require __DIR__ . '/partials/recipe-card.php';
                 ?>

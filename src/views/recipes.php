@@ -11,7 +11,7 @@
  * (docs/04-prototype.md §1): filteren op bereidingstijd en moeilijkheid.
  * De filters worden server-side toegepast met prepared statements (PDO),
  * dus geen SQL-injectie. De uitgebreide zoekfunctie is issue #14. Klikken
- * op een receptkaart linkt naar de detailpagina zodra die bestaat (TODO #13).
+ * op een receptkaart opent de detailpagina (issue #13).
  */
 
 $searchQuery      = trim((string) ($_GET['q'] ?? ''));
@@ -270,9 +270,8 @@ $filterUrl = static function (string $param, string $value, string $current) use
         <div class="recipe-grid">
             <?php foreach ($recipes as $recipe): ?>
                 <?php
-                // TODO(#13): detailpagina. Tot die bestaat linkt de kaart
-                // naar het overzicht van de eigen categorie.
-                $linkUrl = url('recipes') . '?' . http_build_query(['categorie' => $recipe['category_slug']]);
+                // Kaart linkt naar de detailpagina van dit recept (issue #13).
+                $linkUrl = url('recipes/' . $recipe['id']);
                 $showDescription = true;
                 $showIngredients = true;
                 require __DIR__ . '/partials/recipe-card.php';
