@@ -76,11 +76,71 @@ function db(): PDO
 }
 
 /**
- * Bouwt een URL voor een route/pagina, bv. url('recipes') => '/recipes'.
+ * Geeft het basispad van de applicatie terug, zonder trailing slash
+ * (bv. '/beroeps2/project-1', of '' wanneer de app in de root draait).
+ *
+ * Volgorde: 1) config 'app.basePath', 2) automatische detectie.
+ *
+ * Bij een interne Apache-rewrite van /beroeps2/project-1/route naar
+ * public/index.php bevat SCRIPT_NAME '/beroeps2/project-1/public/index.php'
+ * terwijl REQUEST_URI '/beroeps2/project-1/route' is. We leiden het basispad
+ * daarom af uit SCRIPT_NAME door '/public/index.php' eraf te halen.
+ * Bij de ingebouwde PHP-server (router.php) levert dit '' op.
+ */
+function basePath(): string
+{
+    static $base = null;
+
+    if ($base !== null) {
+        return $base;
+    }
+
+    $configured = config('app.basePath');
+
+    if (is_string($configured)) {
+        return $base = rtrim('/' . trim($configured, '/'), '/');
+    }
+
+    $script = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+    $suffix = '/public/index.php';
+
+    if ($script !== '' && str_ends_with($script, $suffix)) {
+        return $base = substr($script, 0, -strlen($suffix));
+    }
+
+    return $base = '';
+}
+
+/**
+ * Bepaalt het route-pad van het huidige verzoek, zonder basispad en
+ * zonder eventueel '/public'-voorvoegsel, bv. '/recipes'.
+ */
+function requestPath(): string
+{
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $base = basePath();
+
+    if ($base !== '' && ($path === $base || str_starts_with($path, $base . '/'))) {
+        $path = substr($path, strlen($base));
+    }
+
+    if ($path === '/public' || str_starts_with($path, '/public/')) {
+        $path = substr($path, strlen('/public'));
+    }
+
+    return '/' . trim($path, '/');
+}
+
+/**
+ * Bouwt een URL voor een route/pagina, bv. url('recipes') => '/recipes'
+ * (of '/beroeps2/project-1/recipes' op de server).
  */
 function url(string $path = ''): string
 {
-    return rtrim((string) config('app.baseUrl', ''), '/') . '/' . ltrim($path, '/');
+    $prefix = config('app.baseUrl');
+    $prefix = is_string($prefix) && $prefix !== '' ? $prefix : basePath();
+
+    return rtrim($prefix, '/') . '/' . ltrim($path, '/');
 }
 
 /**
@@ -90,6 +150,21 @@ function url(string $path = ''): string
 function asset(string $path): string
 {
     return url('assets/' . ltrim($path, '/'));
+}
+
+// Sessie-cookie afgeschermd op het basispad, zodat sessies niet botsen met
+// andere PHP-projecten op hetzelfde domein. De sessie wordt hier niet gestart;
+// roep session_start() aan waar nodig.
+if (session_status() === PHP_SESSION_NONE) {
+    $sessionPath = config('session.path');
+    session_name((string) config('session.name', 'smaakmaatje_sid'));
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => is_string($sessionPath) ? $sessionPath : (basePath() ?: '/'),
+        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
 }
 
 // Eenvoudige autoloader voor klassen in src/ (geen Composer nodig).

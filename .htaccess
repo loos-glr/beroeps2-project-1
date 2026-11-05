@@ -1,0 +1,32 @@
+# ============================================================
+# Root .htaccess — Plesk Git-deploy in /httpdocs/beroeps2/project-1
+# URL: https://<domein>/beroeps2/project-1/
+#
+# 1. Blokkeert gevoelige bestanden/mappen.
+# 2. Herschrijft intern naar public/ (URL in browser blijft hetzelfde).
+# ============================================================
+
+Options -Indexes
+
+# --- Gevoelige bestanden (overal in de boom) ---
+<FilesMatch "(^\.|\.(md|sh|lock|example|bak|log|sql|ini)$|^(composer\.json|package(-lock)?\.json|router\.php|config\.local\.php)$)">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /beroeps2/project-1/
+
+    # --- Gevoelige mappen: 403 ---
+    RewriteRule ^(\.git|vendor|storage|app|src|config|database|tests|docs|node_modules|uploads|var|logs)(/|$) - [F,L]
+
+    # --- Reeds in public/: niets meer doen (voorkomt loops) ---
+    RewriteRule ^public/ - [L]
+
+    # --- Bestaand statisch bestand in public/ (css, js, afbeeldingen) ---
+    RewriteCond %{DOCUMENT_ROOT}/beroeps2/project-1/public/$1 -f
+    RewriteRule ^(.+)$ public/$1 [L]
+
+    # --- Al het andere: front controller ---
+    RewriteRule ^ public/index.php [L]
+</IfModule>

@@ -16,7 +16,17 @@ return [
         // 'development' toont o.a. de database-status op de homepagina.
         // Zet op 'production' zodra de site live gaat (FTP-hosting).
         'env'     => 'development',
+        // Basispad bij hosting in een submap, bv. '/beroeps2/project-1'.
+        // null = automatisch detecteren; '' = forceer root.
+        'basePath' => null,
+        // Optioneel: volledig URL-voorvoegsel voor links/assets
+        // (leeg = gebruik basePath).
         'baseUrl' => '',
+    ],
+    'session' => [
+        'name' => 'smaakmaatje_sid',
+        // null = gelijk aan basePath (aanbevolen), anders bv. '/beroeps2/project-1'.
+        'path' => null,
     ],
     'db' => [
         'host'    => 'localhost',
