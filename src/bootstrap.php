@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Bootstrap: laadt de configuratie en stelt kleine helpers beschikbaar.
  *
- * Wordt als eerste geïmporteerd door public/index.php.
+ * Wordt als eerste geïmporteerd door httpdocs/index.php.
  */
 
 const CONFIG_LOCAL   = __DIR__ . '/../config/config.local.php';
@@ -82,9 +82,9 @@ function db(): PDO
  * Volgorde: 1) config 'app.basePath', 2) automatische detectie.
  *
  * Bij een interne Apache-rewrite van /beroeps2/project-1/route naar
- * public/index.php bevat SCRIPT_NAME '/beroeps2/project-1/public/index.php'
+ * httpdocs/index.php bevat SCRIPT_NAME '/beroeps2/project-1/httpdocs/index.php'
  * terwijl REQUEST_URI '/beroeps2/project-1/route' is. We leiden het basispad
- * daarom af uit SCRIPT_NAME door '/public/index.php' eraf te halen.
+ * daarom af uit SCRIPT_NAME door '/httpdocs/index.php' eraf te halen.
  * Bij de ingebouwde PHP-server (router.php) levert dit '' op.
  */
 function basePath(): string
@@ -102,7 +102,7 @@ function basePath(): string
     }
 
     $script = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
-    $suffix = '/public/index.php';
+    $suffix = '/httpdocs/index.php';
 
     if ($script !== '' && str_ends_with($script, $suffix)) {
         return $base = substr($script, 0, -strlen($suffix));
@@ -113,7 +113,7 @@ function basePath(): string
 
 /**
  * Bepaalt het route-pad van het huidige verzoek, zonder basispad en
- * zonder eventueel '/public'-voorvoegsel, bv. '/recipes'.
+ * zonder eventueel '/httpdocs'-voorvoegsel, bv. '/recipes'.
  */
 function requestPath(): string
 {
@@ -124,8 +124,8 @@ function requestPath(): string
         $path = substr($path, strlen($base));
     }
 
-    if ($path === '/public' || str_starts_with($path, '/public/')) {
-        $path = substr($path, strlen('/public'));
+    if ($path === '/httpdocs' || str_starts_with($path, '/httpdocs/')) {
+        $path = substr($path, strlen('/httpdocs'));
     }
 
     return '/' . trim($path, '/');
@@ -144,7 +144,7 @@ function url(string $path = ''): string
 }
 
 /**
- * Bouwt een URL naar een statisch bestand in public/assets/, bv.
+ * Bouwt een URL naar een statisch bestand in httpdocs/assets/, bv.
  * asset('css/app.css') => '/assets/css/app.css'.
  */
 function asset(string $path): string

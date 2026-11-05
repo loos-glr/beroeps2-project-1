@@ -41,5 +41,7 @@ $currentPath = '/' . trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH
     <footer class="site-footer">
         <p>&copy; <?= date('Y') ?> Stop de Ontkoking — Smaakmaatje</p>
     </footer>
+
+    <script src="<?= htmlspecialchars(asset('js/app.js')) ?>" defer></script>
 </body>
 </html>

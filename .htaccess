@@ -3,7 +3,7 @@
 # URL: https://<domein>/beroeps2/project-1/
 #
 # 1. Blokkeert gevoelige bestanden/mappen.
-# 2. Herschrijft intern naar public/ (URL in browser blijft hetzelfde).
+# 2. Herschrijft intern naar httpdocs/ (URL in browser blijft hetzelfde).
 # ============================================================
 
 Options -Indexes
@@ -20,13 +20,13 @@ Options -Indexes
     # --- Gevoelige mappen: 403 ---
     RewriteRule ^(\.git|vendor|storage|app|src|config|database|tests|docs|node_modules|uploads|var|logs)(/|$) - [F,L]
 
-    # --- Reeds in public/: niets meer doen (voorkomt loops) ---
-    RewriteRule ^public/ - [L]
+    # --- Reeds in httpdocs/: niets meer doen (voorkomt loops) ---
+    RewriteRule ^httpdocs/ - [L]
 
-    # --- Bestaand statisch bestand in public/ (css, js, afbeeldingen) ---
-    RewriteCond %{DOCUMENT_ROOT}/beroeps2/project-1/public/$1 -f
-    RewriteRule ^(.+)$ public/$1 [L]
+    # --- Bestaand statisch bestand in httpdocs/ (css, js, afbeeldingen) ---
+    RewriteCond %{DOCUMENT_ROOT}/beroeps2/project-1/httpdocs/$1 -f
+    RewriteRule ^(.+)$ httpdocs/$1 [L]
 
     # --- Al het andere: front controller ---
-    RewriteRule ^ public/index.php [L]
+    RewriteRule ^ httpdocs/index.php [L]
 </IfModule>

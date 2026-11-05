@@ -10,7 +10,7 @@ geen post-deploy scripts nodig. Wat in Git staat, draait direct.
 - **Repository path / Deployment path:** `/httpdocs/beroeps2/project-1`
 - Deployment mode: *Automatic* of *Manual*; "Additional deployment actions" leeg laten.
 - De hele repo wordt uitgerold in die map; de root-`.htaccess` blokkeert
-  gevoelige onderdelen en stuurt verkeer intern naar `public/`.
+  gevoelige onderdelen en stuurt verkeer intern naar `httpdocs/`.
 
 ## 2. Configuratie (`config.local.php`, geen `.env`)
 
@@ -50,7 +50,7 @@ Het bestand wordt bij een volgende Git-deploy niet overschreven of verwijderd
 Er zijn geen cache-, log- of storage-mappen. Alleen `uploads/` heeft
 schrijfrechten nodig (bij Plesk: de website-gebruiker moet *Schrijven* hebben).
 `uploads/` is niet publiek serveerbaar; wil je uploads tonen, serveer ze dan
-via PHP of verplaats ze naar `public/`.
+via PHP of verplaats ze naar `httpdocs/`.
 
 ## 4. Verificatie
 
@@ -81,15 +81,15 @@ location ~ ^/beroeps2/project-1/(.*/)?(\.|composer\.(json|lock)|package(-lock)?\
 
 location ^~ /beroeps2/project-1/ {
     root /var/www/vhosts/<domein>/httpdocs;   # pas aan naar je vhost-pad
-    # Statische bestanden uit public/
-    try_files /beroeps2/project-1/public$uri @project1_front;
+    # Statische bestanden uit httpdocs/
+    try_files /beroeps2/project-1/httpdocs$uri @project1_front;
 }
 
 location @project1_front {
     fastcgi_pass unix:/var/www/vhosts/system/<domein>/php-fpm.sock; # of via Plesk-standaard
     include fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME /var/www/vhosts/<domein>/httpdocs/beroeps2/project-1/public/index.php;
-    fastcgi_param SCRIPT_NAME /beroeps2/project-1/public/index.php;
+    fastcgi_param SCRIPT_FILENAME /var/www/vhosts/<domein>/httpdocs/beroeps2/project-1/httpdocs/index.php;
+    fastcgi_param SCRIPT_NAME /beroeps2/project-1/httpdocs/index.php;
 }
 ```
 
