@@ -1,7 +1,14 @@
-# Front controller voor Apache-hosting (FTP).
-# Stuur alle verzoeken zonder bestaand bestand door naar index.php.
-RewriteEngine On
+# Front controller binnen httpdocs/.
+# De root-.htaccess stuurt /beroeps2/project-1/... intern door naar httpdocs/.
+# RewriteBase is hier de URL van DEZE map (…/httpdocs/); voor directe toegang
+# en voor lokaal gebruik op Apache.
+Options -Indexes
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [L]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /beroeps2/project-1/httpdocs/
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>

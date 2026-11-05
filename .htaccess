@@ -1,0 +1,32 @@
+# ============================================================
+# Root .htaccess — Plesk Git-deploy in /httpdocs/beroeps2/project-1
+# URL: https://<domein>/beroeps2/project-1/
+#
+# 1. Blokkeert gevoelige bestanden/mappen.
+# 2. Herschrijft intern naar httpdocs/ (URL in browser blijft hetzelfde).
+# ============================================================
+
+Options -Indexes
+
+# --- Gevoelige bestanden (overal in de boom) ---
+<FilesMatch "(^\.|\.(md|sh|lock|example|bak|log|sql|ini)$|^(composer\.json|package(-lock)?\.json|router\.php|config\.local\.php)$)">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /beroeps2/project-1/
+
+    # --- Gevoelige mappen: 403 ---
+    RewriteRule ^(\.git|vendor|storage|app|src|config|database|tests|docs|node_modules|uploads|var|logs)(/|$) - [F,L]
+
+    # --- Reeds in httpdocs/: niets meer doen (voorkomt loops) ---
+    RewriteRule ^httpdocs/ - [L]
+
+    # --- Bestaand statisch bestand in httpdocs/ (css, js, afbeeldingen) ---
+    RewriteCond %{DOCUMENT_ROOT}/beroeps2/project-1/httpdocs/$1 -f
+    RewriteRule ^(.+)$ httpdocs/$1 [L]
+
+    # --- Al het andere: front controller ---
+    RewriteRule ^ httpdocs/index.php [L]
+</IfModule>

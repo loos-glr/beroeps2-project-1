@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 require __DIR__ . '/../src/bootstrap.php';
 
-$path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$path = '/' . trim($path, '/');
+// Route-pad zonder basispad (/beroeps2/project-1) en zonder /httpdocs.
+$path = requestPath();
 
 $routes = [
     '/'        => 'home',
